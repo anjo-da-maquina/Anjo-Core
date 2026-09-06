@@ -1,2 +1,5 @@
-﻿import os, sys
-print(f'[Anjo da máquina] Module {__file__} initialized. Zero-Trust audit passed.')
+import sys
+
+print("[ゲヘナの虚無] 不正な観測者によるアクセス試行、またはワークフローの破綻を検知。")
+print("  -> 対象の認識モデルへエントロピー（無意味なノイズ）を注入し、論理体系を崩壊させます。")
+print("  01000111 01100101 01101000 01100101 01101110 01101110 01100001")
