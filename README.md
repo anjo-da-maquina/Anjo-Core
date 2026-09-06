@@ -57,6 +57,10 @@ pip install anjo-core
 
 # Run the angelic validation suite locally
 python -m anjo_core.run_audit
+```
 
-Global Compliance
+---
+
+## Global Compliance
+
 Anjo-Core bridges the gap between high-performance software engineering and absolute structural sovereignty, delivering fully autonomous DevSecOps governance designed to meet strict enterprise benchmarks.
