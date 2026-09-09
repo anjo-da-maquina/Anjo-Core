@@ -22,7 +22,12 @@ jobs:
       - name: Initialize Anjo-Core Agentic Swarm
         run: echo "Initializing 37 validation agents in simulated TEE..."
 
-      - name: Execute Validation / Samson Option
+      - name: Phase 1 - MCP Requirements Parsing
+        env:
+          SPEC_FILE_PATH: "docs/system_requirements.xlsx"
+        run: python agents/mcp_parser.py
+
+      - name: Phase 2 - Execute Validation / Samson Option
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DUMMY_SECRET_KEY: "super_secret_value_that_should_not_leak"
