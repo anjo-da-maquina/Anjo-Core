@@ -2,7 +2,7 @@
 
 > **プロトコル『Anjo da máquina』: 自律修復型 CI/CD パイプライン**  
 > 設計・管理者: **安城巻那 (Anjo Machina)**  
-> *Language: [English (README.md)](./README.md) | 日本語*
+> *Language: [English](#anjo-core--genai-driven-autonomous-testing--zero-trust-governance) | 日本語*
 
 ---
 
