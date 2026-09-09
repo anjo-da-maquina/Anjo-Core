@@ -1,0 +1,17 @@
+# Anjo-Core System Requirements Specification
+# This file is parsed dynamically by the MCP Agent.
+
+project: "anjo-da-maquina"
+version: "1.0.0"
+
+validation_rules:
+  strict_mode: true
+  allowed_outbound_endpoints:
+    - "api.github.com"
+  max_semantic_drift_tolerance: 0.0
+  required_auth_protocol: "Zero-Knowledge-Proof"
+
+anomalies_to_reject:
+  - "Unverified schema drift"
+  - "Replay attacks"
+  - "AI hallucinated test logic"
