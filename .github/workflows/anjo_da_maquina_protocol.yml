@@ -6,134 +6,134 @@ on:
   workflow_dispatch:
     inputs:
       chaos_mode:
-        description: 'カオスモード（生存証明の途絶・システム異常のシミュレート）を有効にする'
+        description: 'Enable chaos mode (simulate loss of survival proof and system anomalies)'
         required: false
         default: false
         type: boolean
 
 jobs:
   angelic-audit:
-    name: 聖なる統合監視 (Angelic Zero-Trust Audit)
+    name: Angelic Zero-Trust Audit
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. 聖域の準備 (Checkout Repository)
+      - name: 1. Prepare Sanctuary (Checkout Repository)
         uses: actions/checkout@v4
 
-      - name: 2. 祭壇の準備 (Set up Python)
+      - name: 2. Prepare Altar (Set up Python)
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 3. 供物の準備 (Install Dependencies)
+      - name: 3. Prepare Offerings (Install Dependencies)
         run: |
           python -m pip install --upgrade pip
           pip install networkx pyyaml playwright mcp pandas openpyxl pytest
           playwright install chromium --with-deps
 
-      - name: 3.1. 第五の封印 (The Fifth Seal - サムソン・オプション)
+      - name: 3.1. The Fifth Seal (Samson Option)
         env:
           CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
         run: python angels/fifth_seal_samson.py
 
-      - name: 3.2. アルファとオメガの結界 (Workflow Integrity Guard)
+      - name: 3.2. Alpha and Omega Guard (Workflow Integrity Guard)
         run: python angels/alpha_omega_guard.py
-      - name: 3.3. ルシファーの反逆 (Chaos Engineering)
+      - name: 3.3. Lucifer's Rebellion (Chaos Engineering)
         env:
           CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
         run: python angels/lucifer_rebellion.py
-      - name: 3.4. メタトロンの立方体 (Metatron's Cube - ハードウェア物理署名監査)
+      - name: 3.4. Metatron's Cube (Hardware Physical Signature Audit)
         run: python angels/metatron_cube_hsm.py
-      - name: 3.5. 穹窿の聖域 (Firmament Enclave - TEEメモリ暗号化監査)
+      - name: 3.5. Firmament Enclave (TEE Memory Encryption Audit)
         run: python angels/firmament_enclave_tee.py
-      - name: 3.6. シャミールの封印 (Shamir's Seal - 分散鍵管理と管轄区定足数監査)
+      - name: 3.6. Shamir's Seal (Distributed Key Management and Jurisdiction Quorum Audit)
         env:
           CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
         run: python angels/shamir_seal.py
-      - name: 3.8. 外部要件の抽出 (Excel to YAML Parser)
+      - name: 3.8. External Requirements Extraction (Excel to YAML Parser)
         run: python adapters/excel_to_yaml_parser.py
 
-      - name: 4. ウリエルの炎 (Uriel - リプレイ攻撃監査)
+      - name: 4. Uriel's Flame (Replay Attack Audit)
         run: python angels/uriel_nonce.py
-      - name: 4.5. メタトロンの啓示 (Metatron MCP - 思考統制監査)
+      - name: 4.5. Metatron's Revelation (Metatron MCP - Thought Control Audit)
         run: python angels/metatron_revelation_mcp.py
-      - name: 4.8. 熾天使の合意 (Seraphim Consensus - マルチLLM異端検知)
+      - name: 4.8. Seraphim Consensus (Multi-LLM Heresy Detection)
         env:
           CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
         run: python angels/seraphim_consensus.py
-      - name: 4.9. エノクの神託 (Enochian Oracle - 分散型オラクル真理監査)
+      - name: 4.9. Enochian Oracle (Distributed Oracle Truth Audit)
         run: python angels/enochian_oracle.py
-      - name: 4.10. ラファエルの癒やし (Raphael - フェイルクローズ前の自律修復)
+      - name: 4.10. Raphael's Healing (Autonomous Remediation before Fail-Close)
         run: python angels/raphael_remediation.py
-      - name: 5. メタトロンの印 (Metatron Seal - 要件改ざん防止)
+      - name: 5. Metatron Seal (Requirements Tamper Prevention)
         run: python angels/metatron_commitment.py
-      - name: 6. ミカエルの剣 (Michael - 論理隠蔽監査)
+      - name: 6. Michael's Sword (Logic Obfuscation Audit)
         run: python angels/michael_sword.py
-      - name: 7. オファニムの眼 (Ophanim - 資金還流監査)
+      - name: 7. Ophanim's Eye (Capital Flow Audit)
         run: python angels/ophanim_eye.py
-      - name: 8. ザドキエルの天球儀 (Zadkiel - 状態遷移監査)
+      - name: 8. Zadkiel's Astrolabe (State Transition Audit)
         run: python angels/zadkiel_astrolabe.py
-      - name: 9. カマエルの盾 (Camael - ペイロード防御監査)
+      - name: 9. Camael's Shield (Payload Defense Audit)
         run: python angels/camael_shield.py
-      - name: 10. ジョフィエルの鏡 (Jophiel - 意味論的ドリフト監査)
+      - name: 10. Jophiel's Mirror (Semantic Drift Audit)
         run: python angels/jophiel_semantic.py
-      - name: 11. ガブリエルの囁き (Gabriel - 機密漏洩監査)
+      - name: 11. Gabriel's Whisper (Secret Leak Audit)
         run: python angels/gabriel_canary.py
-      - name: 12. ラグエルの天秤 (Raguel - 物理空間監査)
+      - name: 12. Raguel's Scale (Physical Space Audit)
         run: python angels/raguel_scale.py
-      - name: 13. ラジエルの書 (Raziel - スマートコントラクト鑑定)
+      - name: 13. Raziel's Book (Smart Contract Appraisal)
         run: python angels/raziel_auditor.py
-      - name: 14. サリエルの裁定 (Sariel - 外部ツール堕天監査)
+      - name: 14. Sariel's Verdict (External Tool Fallen Audit)
         run: python angels/sariel_fallen_auditor.py
-      - name: 15. 聖域 (Sanctuary - デプロイ許可)
+      - name: 15. Sanctuary (Deployment Authorization)
         if: success()
-        run: echo "すべての静的・暗号論的監査を通過しました。"
+        run: echo "All static and cryptographic audits have been successfully passed."
 
-      - name: 16. 権天使の試練 (Principalities - 機能要件E2E監査)
+      - name: 16. Principalities' Trial (Functional Requirements E2E Audit)
         if: success()
         run: python angels/principalities_e2e.py
-      - name: 17. 座天使の千眼 (Thousand Eyes - UI視覚監査)
+      - name: 17. Thousand Eyes (UI Visual Audit)
         if: success()
         run: python angels/ophanim_thousand_eyes.py
-      - name: 18. 外部QAツールの実行 (External QA Adapter)
+      - name: 18. External QA Tool Execution (External QA Adapter)
         if: success()
         run: python adapters/external_qa_wrapper.py
-      - name: 18.5. 智天使の結界 (Cherubim - eBPFランタイム監視)
+      - name: 18.5. Cherubim's Barrier (eBPF Runtime Monitoring)
         env:
           CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
         run: python angels/cherubim_ebpf_guard.py
-      - name: 19. 力天使の試練 (Virtues - 非機能要件負荷監査)
+      - name: 19. Virtues' Trial (Non-Functional Requirements Load Audit)
         if: success()
         run: python angels/virtues_load.py
-      - name: 20. サンダルフォンの響 (Sandalphon - 監査証跡監査)
+      - name: 20. Sandalphon's Echo (Audit Trail Audit)
         if: success()
         run: python angels/sandalphon_echo.py
-      - name: 21. 大天使の印璽 (Sanctuary Manifest - 品質担保一覧出力)
+      - name: 21. Sanctuary Manifest (Quality Assurance Summary Output)
         if: success()
         run: python angels/sanctuary_manifest.py
-      - name: 21.5. サンダルフォンの楔 (Sandalphon Anchor - 証跡のブロックチェーン刻印)
+      - name: 21.5. Sandalphon Anchor (Blockchain Stamping of Audit Trail)
         if: success()
         run: python angels/sandalphon_anchor.py
-      - name: 22. 汎用レポート出力 (JUnit XML Exporter)
+      - name: 22. Generic Report Export (JUnit XML Exporter)
         if: success()
         run: python adapters/junit_xml_exporter.py
-      - name: 22.5. 天の石版 (The Heavenly Tablets - ZKP生成)
+      - name: 22.5. The Heavenly Tablets (ZKP Generation)
         if: success()
         run: python angels/heavenly_tablets_zkp.py
 
-      - name: 22.8. ゲヘナの虚無 (Gehenna - 観測者へのエントロピー返却)
+      - name: 22.8. Void of Gehenna (Return Entropy to Observer)
         if: failure() || cancelled()
         run: python angels/gehenna_void_entropy.py
-      - name: 22.9. アズラエルの大鎌 (Azrael - スマートコントラクト清算)
+      - name: 22.9. Azrael's Scythe (Smart Contract Slashing)
         if: failure() || cancelled()
         run: python angels/azrael_scythe_slashing.py
-      - name: 23.0. 黙示録の七つのラッパ (Seven Trumpets - 不変事象の普遍的公開)
+      - name: 23.0. Seven Trumpets of the Apocalypse (Universal Publication of Immutable Events)
         if: failure() || cancelled()
         run: python angels/seven_trumpets_ledger.py
 
-      - name: 23.5. 最後の審判 (Dies Irae - 連座制キルスイッチ)
+      - name: 23.5. Dies Irae (Collective Responsibility Kill Switch)
         if: failure() || cancelled()
         run: python angels/dies_irae.py
-      - name: 24. 静寂の玉座 (Throne of Ataraxia - 完全初期化・浄化)
+      - name: 24. Throne of Ataraxia (Complete Initialization and Purification)
         if: always()
         run: python angels/ataraxia_throne.py
