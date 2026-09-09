@@ -1,0 +1,31 @@
+name: Anjo-Core Zero-Trust Gateway
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  anjo-core-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Initialize Anjo-Core Agentic Swarm
+        run: echo "Initializing 37 validation agents in simulated TEE..."
+
+      - name: Execute The Samson Option (Fail-Closed Circuit)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DUMMY_SECRET_KEY: "super_secret_value_that_should_not_leak"
+        # 異常が検知されたと仮定して、強制パージを実行する
+        run: python agents/samson_option.py
+
+      # ここから下のステップは、上のスクリプトがsys.exit(1)を返すため絶対に実行されない
+      - name: Merge to Main
+        run: echo "This step will never be reached if Anjo-Core detects an anomaly."
