@@ -28,7 +28,7 @@ jobs:
       - name: 3. Prepare Offerings (Install Dependencies)
         run: |
           python -m pip install --upgrade pip
-          pip install networkx pyyaml mcp pandas openpyxl pytest
+          pip install networkx pyyaml playwright mcp pandas openpyxl pytest
 
       - name: 3.1. The Fifth Seal (Samson Option)
         env:
@@ -115,7 +115,7 @@ jobs:
         run: python angels/sandalphon_anchor.py
       - name: 22. Generic Report Export (JUnit XML Exporter)
         if: success()
-        run: chmod +x adapters/junit_xml_exporter.py && python adapters/junit_xml_exporter.py
+        run: python adapters/junit_xml_exporter.py
       - name: 22.5. The Heavenly Tablets (ZKP Generation)
         if: success()
         run: python angels/heavenly_tablets_zkp.py
