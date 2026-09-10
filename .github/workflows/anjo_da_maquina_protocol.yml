@@ -1,138 +1,47 @@
-name: Anjo da máquina Protocol - Angels
+name: Anjo da máquina Zero-Trust Pipeline
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
-    inputs:
-      chaos_mode:
-        description: 'Enable chaos mode (simulate loss of survival proof and system anomalies)'
-        required: false
-        default: false
-        type: boolean
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  angelic-audit:
-    name: Angelic Zero-Trust Audit
+  zero-trust-audit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Prepare Sanctuary (Checkout Repository)
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: 2. Prepare Altar (Set up Python)
-        uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: 3. Prepare Offerings (Install Dependencies)
+      - name: Install Dependencies (Awaken the neural network)
         run: |
           python -m pip install --upgrade pip
-          pip install networkx pyyaml playwright mcp pandas openpyxl pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: 3.1. The Fifth Seal (Samson Option)
-        env:
-          CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
-        run: python angels/fifth_seal_samson.py
-
-      - name: 3.2. Alpha and Omega Guard (Workflow Integrity Guard)
-        run: python angels/alpha_omega_guard.py
-      - name: 3.3. Lucifer's Rebellion (Chaos Engineering)
-        env:
-          CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
-        run: python angels/lucifer_rebellion.py
-      - name: 3.4. Metatron's Cube (Hardware Physical Signature Audit)
-        run: python angels/metatron_cube_hsm.py
-      - name: 3.5. Firmament Enclave (TEE Memory Encryption Audit)
-        run: python angels/firmament_enclave_tee.py
-      - name: 3.6. Shamir's Seal (Distributed Key Management and Jurisdiction Quorum Audit)
-        env:
-          CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
-        run: python angels/shamir_seal.py
-      - name: 3.8. External Requirements Extraction (Excel to YAML Parser)
+      - name: Stage 1 - External Requirements Extraction
         run: python adapters/excel_to_yaml_parser.py
 
-      - name: 4. Uriel's Flame (Replay Attack Audit)
-        run: python angels/uriel_nonce.py
-      - name: 4.5. Metatron's Revelation (Metatron MCP - Thought Control Audit)
-        run: python angels/metatron_revelation_mcp.py
-      - name: 4.8. Seraphim Consensus (Multi-LLM Heresy Detection)
-        env:
-          CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
-        run: python angels/seraphim_consensus.py
-      - name: 4.9. Enochian Oracle (Distributed Oracle Truth Audit)
-        run: python angels/enochian_oracle.py
-      - name: 4.10. Raphael's Healing (Autonomous Remediation before Fail-Close)
-        run: python angels/raphael_remediation.py
-      - name: 5. Metatron Seal (Requirements Tamper Prevention)
-        run: python angels/metatron_commitment.py
-      - name: 6. Michael's Sword (Logic Obfuscation Audit)
-        run: python angels/michael_sword.py
-      - name: 7. Ophanim's Eye (Capital Flow Audit)
-        run: python angels/ophanim_eye.py
-      - name: 8. Zadkiel's Astrolabe (State Transition Audit)
-        run: python angels/zadkiel_astrolabe.py
-      - name: 9. Camael's Shield (Payload Defense Audit)
-        run: python angels/camael_shield.py
-      - name: 10. Jophiel's Mirror (Semantic Drift Audit)
-        run: python angels/jophiel_semantic.py
-      - name: 11. Gabriel's Whisper (Secret Leak Audit)
-        run: python angels/gabriel_canary.py
-      - name: 12. Raguel's Scale (Physical Space Audit)
-        run: python angels/raguel_scale.py
-      - name: 13. Raziel's Book (Smart Contract Appraisal)
-        run: python angels/raziel_auditor.py
-      - name: 14. Sariel's Verdict (External Tool Fallen Audit)
-        run: python angels/sariel_fallen_auditor.py
-      - name: 15. Sanctuary (Deployment Authorization)
-        if: success()
-        run: echo "All static and cryptographic audits have been successfully passed."
-
-      - name: 16. Principalities' Trial (Functional Requirements E2E Audit)
-        if: success()
-        run: python angels/principalities_e2e.py
-      - name: 17. Thousand Eyes (UI Visual Audit)
-        if: success()
-        run: python angels/ophanim_thousand_eyes.py
-      - name: 18. External QA Tool Execution (External QA Adapter)
-        if: success()
-        run: python adapters/external_qa_wrapper.py
-      - name: 18.5. Cherubim's Barrier (eBPF Runtime Monitoring)
-        env:
-          CHAOS_MODE: ${{ github.event.inputs.chaos_mode == 'true' && 'true' || 'false' }}
-        run: python angels/cherubim_ebpf_guard.py
-      - name: 19. Virtues' Trial (Non-Functional Requirements Load Audit)
-        if: success()
-        run: python angels/virtues_load.py
-      - name: 20. Sandalphon's Echo (Audit Trail Audit)
-        if: success()
-        run: python angels/sandalphon_echo.py
-      - name: 21. Sanctuary Manifest (Quality Assurance Summary Output)
-        if: success()
-        run: python angels/sanctuary_manifest.py
-      - name: 21.5. Sandalphon Anchor (Blockchain Stamping of Audit Trail)
-        if: success()
-        run: python angels/sandalphon_anchor.py
-      - name: 22. Generic Report Export (JUnit XML Exporter)
-        if: success()
-        run: python adapters/junit_xml_exporter.py
-      - name: 22.5. The Heavenly Tablets (ZKP Generation)
-        if: success()
-        run: python angels/heavenly_tablets_zkp.py
-
-      - name: 22.8. Void of Gehenna (Return Entropy to Observer)
-        if: failure() || cancelled()
-        run: python angels/gehenna_void_entropy.py
-      - name: 22.9. Azrael's Scythe (Smart Contract Slashing)
-        if: failure() || cancelled()
-        run: python angels/azrael_scythe_slashing.py
-      - name: 23.0. Seven Trumpets of the Apocalypse (Universal Publication of Immutable Events)
-        if: failure() || cancelled()
-        run: python angels/seven_trumpets_ledger.py
-
-      - name: 23.5. Dies Irae (Collective Responsibility Kill Switch)
-        if: failure() || cancelled()
-        run: python angels/dies_irae.py
-      - name: 24. Throne of Ataraxia (Complete Initialization and Purification)
-        if: always()
-        run: python angels/ataraxia_throne.py
+      - name: Stage 2 - Angelic Security Audits
+        run: |
+          python angels/alpha_omega_guard.py
+          python angels/lucifer_rebellion.py
+          python angels/metatron_cube_hsm.py
+          python angels/firmament_enclave_tee.py
+          python angels/shamir_seal.py
+          python angels/uriel_nonce.py
+          python angels/gehenna_purge.py
+          python angels/azrael_termination.py
+          python angels/michael_aegis.py
+          python angels/gabriel_trumpet.py
+          python angels/raphael_remedy.py
+          
+      - name: Stage 3 - Consensus and Final Lock (Ataraxia)
+        run: |
+          python agent/consensus_agent.py
+          python angels/throne_of_ataraxia.py
