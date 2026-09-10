@@ -22,3 +22,5 @@ if __name__ == "__main__":
         
     logging.info(f"JUnit XML report successfully exported to {report_path}")
     sys.exit(0)
+
+# フォルダステータス表示更新用
