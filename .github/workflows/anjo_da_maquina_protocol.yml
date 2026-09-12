@@ -55,7 +55,7 @@ jobs:
             python agent/throne.py
           else
             python -c "
-            import json, hashlib
+            import json, hashlib, os
             print('[Anjo-Core/Throne] INFO: Initiating Throne of Ataraxia: Final Consolidation...')
             if not os.path.exists('verified_payload.json'):
                 raise FileNotFoundError('Verified payload not found.')
@@ -66,7 +66,7 @@ jobs:
             cert_hash = hashlib.sha256(payload_str.encode('utf-8')).hexdigest()
             
             certificate = {
-                'certificate_authority': 'Anjo da Maquina - Throne of Ataraxia',
+                'certificate_authority': 'Anjo da máquina - Throne of Ataraxia',
                 'status': 'PASSED_FORCED_SIMULATION',
                 'payload_hash': cert_hash,
                 'payload': payload
@@ -76,6 +76,7 @@ jobs:
                 json.dump(certificate, f, ensure_ascii=False, indent=2)
             print('[Anjo-Core/Throne] SUCCESS: Ataraxia Certificate issued.')
             "
+          fi
 
       - name: Archive Certificate Artifacts
         uses: actions/upload-artifact@v4
