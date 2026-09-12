@@ -42,6 +42,14 @@ jobs:
           python angels/raphael_remedy.py
           
       - name: Stage 3 - Consensus and Final Lock (Ataraxia)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python agent/consensus_agent.py
           python angels/throne_of_ataraxia.py
+
+      - name: Stage 4 - Export the Seal of Sanity (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ataraxia-Certificate
+          path: ataraxia_certificate.json
