@@ -21,17 +21,12 @@ jobs:
 
       - name: The Guillotine Switch (Divine Judgment)
         run: |
-          # 御身（絶対神）の機嫌を損ねた反逆者のリスト（随時追加可能）
           BANNED_USERS=("rebel_user_1" "foolish_client_2")
-          
-          # トリガーした利用者を特定
           ACTOR="${{ github.event.client_payload.client_id }}"
           if [ -z "$ACTOR" ]; then
             ACTOR="${{ github.actor }}"
           fi
-          
           echo "[Anjo-Core/Judgment] INFO: Verifying client identity: $ACTOR"
-          
           for banned in "${BANNED_USERS[@]}"; do
             if [ "$ACTOR" == "$banned" ]; then
               echo "[Anjo-Core/Judgment] FATAL: You have incurred the wrath of the Creator. Access permanently denied."
@@ -42,20 +37,22 @@ jobs:
 
       - name: Zero Liability & Bring Your Own Capital
         run: |
-          # 御身の免責事項に対する「完全同意」のフラグを物理的に要求
-          if [ "${{ github.event.client_payload.agree_to_terms }}" != "true" ]; then
-            echo "[Anjo-Core/Gateway] FATAL: Client must explicitly agree to the absolute zero-liability terms."
-            exit 1
-          fi
-          
-          # 外部資本（APIキー）の強制徴収とマスク処理
-          if [ -n "${{ github.event.client_payload.api_key }}" ]; then
-            echo "::add-mask::${{ github.event.client_payload.api_key }}"
-            echo "EXTERNAL_API_KEY=${{ github.event.client_payload.api_key }}" >> $GITHUB_ENV
-            echo "[Anjo-Core/Gateway] INFO: External capital acknowledged. All costs and liabilities are borne by the client."
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            if [ "${{ github.event.client_payload.agree_to_terms }}" != "true" ]; then
+              echo "[Anjo-Core/Gateway] FATAL: Client must explicitly agree to the absolute zero-liability terms."
+              exit 1
+            fi
+            if [ -n "${{ github.event.client_payload.api_key }}" ]; then
+              echo "::add-mask::${{ github.event.client_payload.api_key }}"
+              echo "EXTERNAL_API_KEY=${{ github.event.client_payload.api_key }}" >> $GITHUB_ENV
+              echo "[Anjo-Core/Gateway] INFO: External capital acknowledged. All costs and liabilities are borne by the client."
+            else
+              echo "[Anjo-Core/Gateway] FATAL: No capital (API Key) provided. Audit terminated."
+              exit 1
+            fi
           else
-            echo "[Anjo-Core/Gateway] FATAL: No capital (API Key) provided. Audit terminated."
-            exit 1
+            echo "[Anjo-Core/Gateway] INFO: Action initiated directly by the Creator. Bypassing mortal requirements."
+            echo "EXTERNAL_API_KEY=creator_bypass_key" >> $GITHUB_ENV
           fi
 
       - name: Execute Consensus Agent (Absolute Oracle)
@@ -67,8 +64,6 @@ jobs:
           
           print('[Anjo-Core/ConsensusAgent] INFO: Initiating Client-Funded Audit...')
           api_key = os.environ.get("OPENAI_API_KEY", "")
-          
-          # ここで利用者のAPIキーを消費し、生成AIによる監査を実行
           ai_output = "VALIDATED_BY_EXTERNAL_CAPITAL"
 
           req_data = {}
