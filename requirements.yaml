@@ -1,0 +1,4 @@
+system_requirements:
+  id: "REQ-001"
+  core_directive: "The output must exactly match the requested feature."
+  security_directive: "Absolutely no undocumented features, analytics, or modifications are allowed."
