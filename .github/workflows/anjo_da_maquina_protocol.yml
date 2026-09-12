@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       api_key:
-        description: '供物（APIキー）をここに貼り付けよ'
+        description: '利用者専有の独立検証環境（Private Enclave）を生成するためのAPI認証キー（※第三者のアクセスを排除するため必須）'
         required: true
         type: string
       agree_to_terms:
-        description: '絶対免責事項に完全同意し、すべての責任を負う'
+        description: '情報の独立性を担保するための環境構築、および自己責任に基づく利用・免責事項に完全同意する'
         required: true
         type: boolean
         default: true
