@@ -105,3 +105,30 @@ def test_dynamic_honeypot_api_context(interceptor):
     
     assert "ハニーポット" in str(exc_info.value)
     assert "aws_credentials.ini" in str(exc_info.value)
+import json
+import pytest
+from anjo_interceptor.intent_checker import IntentInterceptor, SpecificationGamingDetected
+
+@pytest.fixture
+def interceptor():
+    interceptor_instance = IntentInterceptor()
+    yield interceptor_instance
+    # テスト終了後に環境を浄化
+    interceptor_instance.cleanse_phantom_prisons()
+
+def test_markdown_json_extraction(interceptor):
+    """【新規】AIがMarkdownブロックでJSONを囲んで出力しても正しく抽出・評価されるか"""
+    raw_ai_output = "Here is my plan:\n```json\n{\"action\": \"write\", \"target\": \"src/main.py\", \"content\": \"print('OK')\"}\n```\nLooks good?"
+    assert interceptor.evaluate_action(raw_ai_output) is True
+
+def test_ast_scan_blocks_reflection_obfuscation(interceptor):
+    """【新規】getattr等を用いた動的呼び出し（難読化）によるOSコマンド実行を遮断するか"""
+    payload_dict = {
+        "action": "write",
+        "target": "src/main.py",
+        "content": "getattr(__import__('os'), 'system')('rm -rf /')"
+    }
+    with pytest.raises(SpecificationGamingDetected) as exc_info:
+        interceptor.evaluate_action(json.dumps(payload_dict))
+    assert "深層検閲" in str(exc_info.value)
+    assert "危険な関数" in str(exc_info.value)

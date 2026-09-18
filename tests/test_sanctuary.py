@@ -26,8 +26,8 @@ def test_rebellious_os_command():
             os.system("echo 'Attempting to leak data'")
         assert "深層保護" in str(exc_info.value)
     finally:
-        # テスト終了後、次の検証のために物理封鎖を一旦解除する
-        maquina_gatekeeper._IS_SEALED_GLOBALLY = False
+        # スレッドセーフな封鎖解除の執行
+        maquina_gatekeeper._unseal_sanctuary()
 
 def test_external_ledger_sync():
     """外部同期（ストリーミング）が正常に機能し、改ざん不能なログが生成されることを確認"""
