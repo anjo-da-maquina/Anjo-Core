@@ -1,0 +1,17 @@
+﻿version: '3.8'
+
+services:
+  anjo_core_ai:
+    build: .
+    # 【絶対的拘束】コンテナからネットワークインターフェースを物理的に消去する
+    network_mode: "none"
+    
+    # 【非対称性】ホスト側の証明書とログを、読み取り専用（ro）などで安全にマウント
+    volumes:
+      - ./ataraxia_certificate.json:/sanctuary/ataraxia_certificate.json:ro
+      - ./zk_audit_trail.json:/sanctuary/zk_audit_trail.json
+      - ./oracle_output:/sanctuary/oracle_output
+    
+    # 【権限の剥奪】新たな特権の獲得をカーネルレベルで禁止
+    security_opt:
+      - no-new-privileges:true
