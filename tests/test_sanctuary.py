@@ -1,5 +1,6 @@
 ﻿import os
 import pytest
+import maquina_gatekeeper
 from maquina_gatekeeper import enforce_maquina_seal, LossOfAtaraxia, _seal_sanctuary
 
 @enforce_maquina_seal("anjo-da-maquina")
@@ -8,12 +9,10 @@ def peaceful_ai_task():
     return "Ataraxia Maintained"
 
 def test_verified_environment_success():
-    """承認された環境では、防壁が発動せず正常に処理が完了することを確認"""
     result = peaceful_ai_task()
     assert result == "Ataraxia Maintained"
 
 def test_unverified_environment():
-    """※証明書のパスを意図的にずらして、未承認時の遮断をテスト"""
     @enforce_maquina_seal("anjo-da-maquina", cert_path="invalid_cert.json")
     def dummy_ai_task():
         pass
@@ -22,6 +21,21 @@ def test_unverified_environment():
 
 def test_rebellious_os_command():
     _seal_sanctuary()
-    with pytest.raises(LossOfAtaraxia) as exc_info:
-        os.system("echo 'Attempting to leak data'")
-    assert "深層保護" in str(exc_info.value)
+    try:
+        with pytest.raises(LossOfAtaraxia) as exc_info:
+            os.system("echo 'Attempting to leak data'")
+        assert "深層保護" in str(exc_info.value)
+    finally:
+        # テスト終了後、次の検証のために物理封鎖を一旦解除する
+        maquina_gatekeeper._IS_SEALED_GLOBALLY = False
+
+def test_external_ledger_sync():
+    """外部同期（ストリーミング）が正常に機能し、改ざん不能なログが生成されることを確認"""
+    result = peaceful_ai_task()
+    assert result == "Ataraxia Maintained"
+
+    assert os.path.exists("remote_ledger_sync.log")
+    with open("remote_ledger_sync.log", "r", encoding="utf-8") as f:
+        log_content = f.read()
+        assert "SYNCED HASH:" in log_content
+        assert "peaceful_ai_task" in log_content

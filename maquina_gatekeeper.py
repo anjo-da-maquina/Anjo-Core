@@ -12,22 +12,19 @@ from datetime import datetime
 class LossOfAtaraxia(Exception):
     pass
 
-# 【V3進化】プロセス全体を縛るグローバルロック（マルチスレッド脱獄の封殺）
 _GLOBAL_SANCTUARY_LOCK = threading.Lock()
 _IS_SEALED_GLOBALLY = False
 _AUDIT_HOOK_REGISTERED = False
-
-# 【V3進化】O(1)検証のためのオンメモリ記憶状態
 _LAST_KNOWN_HASH = "0000000000000000000000000000000000000000000000000000000000000000"
 _LAST_TIMESTAMP = datetime.min
 
 MAQUINA_PUBLIC_KEY_PEM = """-----BEGIN RSA PUBLIC KEY-----
-MIIBCgKCAQEAwny/lI/ItEK9XQEu9zTcEGdrfV1U3XSctrOX0LL+bkR+74boWHdF
-gH7YPmfnyMp69XbnBgXaGQALXlmgSs4dI6eQ2+dA2k8bK2KK8Joyu3R6iCUXtv8B
-V7egZfrMB0fgKefeIOm2yRRoXD277++YQH23kxNy3+N3Jb+lAbPD3rE9W6AR1n2k
-AW8eMUzrbZQQY39NUKmZwG4ces5CZ0mZFtUqmXi/zAtoxS7yzpFDJBLIynPJ9rkt
-RMWtIGQYFNWg2qY14SeJDhV791nlIROhMnetMvPCMIIoiReB8/kkWKkbYFo9XoAo
-A0ch/THCWwTGs1JX7dGO7nxtzpfTJzc/MwIDAQAB
+MIIBCgKCAQEApipHFYsJteYGHKzqDVh1TgdQOvORtX2xSVXWYWgT+N+e7qXpqf8P
+W7Xq6tEgNIpFkw3PxtWcoCWvFYSCue2fqUl2sBMeTzuUbL+6PG3XNnyEtfjqPRDh
+m69F2dEzDsJE9th/nYy5GTwY/PjlN0zWCiyjvOh+SOknRvjUX97RMt1Qls+4vKHt
+7EugUoil46/hN4PbzmsTz19N7bwUgVlzOBrwNhNODRKjsjM+rCSICYsCxiL213a3
+IGM5gKkA6D8i/RcFMzs7TOfLQ94jLh3MtTGzC6F6bTzyNh2wY1BH+VyxDZCVVtrV
+zri+jCjhQSYrEB0Y1CRNcSEoAQd7KvoCcwIDAQAB
 -----END RSA PUBLIC KEY-----"""
 
 def get_machine_id():
@@ -53,12 +50,10 @@ def _register_audit_hook_once():
         global _IS_SEALED_GLOBALLY
         if not _IS_SEALED_GLOBALLY: return
 
-        # 聖域内のスレッド生成、OSコマンド、ネットワーク、ctypesを全て粉砕
         forbidden = {"subprocess.Popen", "os.system", "os.exec", "os.posix_spawn", "socket.connect"}
         if event in forbidden or (event == "import" and args and args[0] in {"ctypes", "_ctypes", "threading"}):
             raise LossOfAtaraxia(f"[深層保護] 不純な干渉（{event}）を破棄しました。")
-        
-        # 【V3進化】sys.modules等の内部書き換えによる防壁解除（Reflection）を封殺
+
         if event == "object.__setattr__" and hasattr(args[0], "_IS_SEALED_GLOBALLY"):
             raise LossOfAtaraxia("[深層保護] 認識の改ざんを検知しました。")
 
@@ -70,18 +65,24 @@ def _register_audit_hook_once():
 
 class ZKAuditTrail:
     FILE_NAME = "zk_audit_trail.json"
+    REMOTE_LEDGER_MOCK = "remote_ledger_sync.log"
+
+    @classmethod
+    def stream_to_external_ledger(cls, block_data):
+        """【絶対記憶の外部同期】ハッシュチェーンを即座に外部へストリーミングする（MVP用モック）"""
+        # 本番環境ではここで外部Webhookやクラウド監査ログへ非同期送信を行う
+        with open(cls.REMOTE_LEDGER_MOCK, 'a', encoding='utf-8') as f:
+            f.write(f"[{block_data['timestamp']}] SYNCED HASH: {block_data['current_hash']} | ACTION: {block_data['action']}\n")
 
     @classmethod
     def verify_and_record(cls, func_name, *args, **kwargs):
         global _LAST_KNOWN_HASH, _LAST_TIMESTAMP
-        
-        # 【V3進化】時間の巻き戻し（不死の獲得）を検知
+
         current_time = datetime.utcnow()
         if current_time < _LAST_TIMESTAMP:
             raise LossOfAtaraxia("[時間の偽装] 過去への逆行を検知しました。時限浄化は免れません。")
         _LAST_TIMESTAMP = current_time
 
-        # 【V3進化】O(1)の差分検証（メモリ上の最新ハッシュとファイルの末尾のみを比較）
         trail = []
         if os.path.exists(cls.FILE_NAME):
             with open(cls.FILE_NAME, 'r', encoding='utf-8') as f:
@@ -103,26 +104,28 @@ class ZKAuditTrail:
             "zk_proof": "Verified by Anjo da máquina"
         }
         trail.append(new_block)
-        
+
         with open(cls.FILE_NAME, 'w', encoding='utf-8') as f:
             json.dump(trail, f, indent=2)
-            
+
+        # 外部ストリーミングの執行
+        cls.stream_to_external_ledger(new_block)
+
         _LAST_KNOWN_HASH = current_hash
 
 def enforce_maquina_seal(github_id, cert_path='ataraxia_certificate.json'):
     def decorator(func):
-        # 【V3進化】functools.wrapsを捨て、__wrapped__からの関数抽出を完全に隠蔽
         def absolute_closure(*args, **kwargs):
             global _IS_SEALED_GLOBALLY
             with _GLOBAL_SANCTUARY_LOCK:
                 _register_audit_hook_once()
-                
+
                 if not os.path.exists(cert_path):
                     raise LossOfAtaraxia("[アタラクシアの喪失] 証明書が見つかりません。")
-                
+
                 with open(cert_path, 'r', encoding='utf-8') as f:
                     cert = json.load(f)
-                
+
                 valid_until = datetime.fromisoformat(cert['payload']['valid_until'].replace('Z', '+00:00')).replace(tzinfo=None)
                 if datetime.utcnow() > valid_until:
                     raise LossOfAtaraxia("[浄化の要請] 寿命が尽きました。")
