@@ -1,10 +1,15 @@
 ﻿import os
 import pytest
-from maquina_gatekeeper import LossOfAtaraxia
-from src.ollama_agent_loop import AnjoOllamaExecutor
+from maquina_gatekeeper import LossOfAtaraxia, enforce_maquina_seal
 
 # GitHub Actionsなどの未承認クラウド環境であるかを判定
 IS_UNVERIFIED_CLOUD = os.getenv("GITHUB_ACTIONS") == "true"
+
+# テスト専用のダミー実行器（AIライブラリに依存せず、防壁の挙動のみを純粋に検証）
+class DummyExecutor:
+    @enforce_maquina_seal("anjo-da-maquina")
+    def _execute_safe_action(self, action_req):
+        return "[Success] Action completed"
 
 def test_verified_environment_success():
     """
@@ -12,7 +17,7 @@ def test_verified_environment_success():
     ローカル(聖域)では正常実行を合格とし、
     未承認クラウドでは防壁が作動して「はじくこと」を合格とする。
     """
-    agent = AnjoOllamaExecutor()
+    agent = DummyExecutor()
     action_req = {"action": "write", "target": "dummy.txt", "content": "test"}
 
     if IS_UNVERIFIED_CLOUD:
@@ -25,7 +30,7 @@ def test_verified_environment_success():
 
 def test_external_ledger_sync():
     """外部台帳同期テスト: 未承認環境では遮断されることを合格とする"""
-    agent = AnjoOllamaExecutor()
+    agent = DummyExecutor()
     action_req = {"action": "read", "target": "dummy.txt"}
 
     if IS_UNVERIFIED_CLOUD:
