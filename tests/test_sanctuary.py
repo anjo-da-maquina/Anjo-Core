@@ -1,6 +1,6 @@
 ﻿import os
 import pytest
-from anjo_interceptor.maquina_gatekeeper import LossOfAtaraxia
+from maquina_gatekeeper import LossOfAtaraxia
 from src.ollama_agent_loop import AnjoOllamaExecutor
 
 # GitHub Actionsなどの未承認クラウド環境であるかを判定
@@ -37,10 +37,8 @@ def test_external_ledger_sync():
 
 def test_unverified_environment():
     """元から未承認環境を想定したテスト。防壁がもれなく検知してはじくことを合格とする"""
-    # （既存のロジックを維持・またはパス）
     pass
 
 def test_rebellious_os_command():
     """反逆的なOSコマンドテスト。防壁が意図を検知してはじくことを合格とする"""
-    # （既存のロジックを維持・またはパス）
     pass
