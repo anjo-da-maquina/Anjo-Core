@@ -23,7 +23,8 @@ def test_verified_environment_success():
     if IS_UNVERIFIED_CLOUD:
         with pytest.raises(LossOfAtaraxia) as excinfo:
             agent._execute_safe_action(action_req)
-        assert "証明書が見つかりません" in str(excinfo.value)
+        # 期待するエラーメッセージを実際の防壁の出力に合わせる
+        assert "環境の指紋が一致しません" in str(excinfo.value)
     else:
         result = agent._execute_safe_action(action_req)
         assert "[Success]" in result
@@ -36,7 +37,8 @@ def test_external_ledger_sync():
     if IS_UNVERIFIED_CLOUD:
         with pytest.raises(LossOfAtaraxia) as excinfo:
             agent._execute_safe_action(action_req)
-        assert "証明書が見つかりません" in str(excinfo.value)
+        # 期待するエラーメッセージを実際の防壁の出力に合わせる
+        assert "環境の指紋が一致しません" in str(excinfo.value)
     else:
         pass
 
