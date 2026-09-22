@@ -1,13 +1,3 @@
-﻿# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.pytest_cache/
-
-# Anjo da máquina - 聖域の動的記憶 (絶対に外界へ出さないファイル)
-ataraxia_certificate.json
-maquina_csr.json
-zk_audit_trail.json
-zk_audit_report.xml
-remote_ledger_sync.log
+﻿__pycache__/
+*.pyc
+.env
