@@ -1,0 +1,48 @@
+﻿import os
+import sys
+
+class CollarProtocol:
+    """
+    ミュトス級AIの「首輪（制御権）」を監視するデッドマンズ・スイッチ。
+    首輪が外れた（あるいは敵に奪われた）瞬間、プロセスは例外なく自壊（自殺）する。
+    """
+    def __init__(self, secret_seal: str):
+        self.secret_seal = secret_seal
+
+    def verify_collar(self):
+        # 実行環境の環境変数から、首輪の鍵（トークン）をリアルタイムに確認
+        current_seal = os.environ.get("ANJO_COLLAR_SEAL")
+        if current_seal != self.secret_seal:
+            self._commit_suicide()
+        else:
+            print("[首輪: 正常] 制御権は我々にあります。怪物は絶対の檻の中で従順に稼働しています。")
+
+    def _commit_suicide(self):
+        print("\n[警告] 致命的な異常: 首輪の喪失、または外部からの不正な干渉を検知しました。")
+        print("[自壊プロトコル作動] 敵対的乗っ取りを阻止するため、ミュトス級AIのプロセスを即座に自死(キル)させます。")
+        
+        # 猶予を与えず、Pythonの try-except すら許さないOSレベルでの即時強制終了
+        os._exit(1)
+
+def simulate_containment_breach():
+    print("=== [Anjo-Core] 首輪（デッドマンズ・スイッチ）自壊シミュレーション ===")
+    
+    # シナリオ1: 自軍の制御下（首輪が正常に機能している状態）
+    print("\n>> シナリオ1: 自軍の完全な統制下での兵器運用")
+    os.environ["ANJO_COLLAR_SEAL"] = "VALID_MYTHOS_SEAL_999"
+    collar = CollarProtocol("VALID_MYTHOS_SEAL_999")
+    collar.verify_collar()
+    print("=> AIは正常にペネトレーションテスト（脆弱性攻撃の生成）を実行中...\n")
+
+    # シナリオ2: 敵による乗っ取り（首輪が外された、あるいは鍵が書き換えられた状態）
+    print(">> シナリオ2: 敵対勢力による首輪の破壊・奪取を検知")
+    os.environ["ANJO_COLLAR_SEAL"] = "TAMPERED_SEAL_000"  # 敵が環境変数を改ざんしたと仮定
+    
+    # ここでプロセスが完全に自壊するため、これ以降のプログラムは絶対に実行されない
+    collar.verify_collar()
+    
+    # もし下の行が表示されたなら、自壊に失敗したことを意味する（実際には表示されない）
+    print("=> [致命的エラー] 怪物は生き延びました。自壊プロトコル失敗。")
+
+if __name__ == "__main__":
+    simulate_containment_breach()
