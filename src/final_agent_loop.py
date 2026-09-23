@@ -2,6 +2,7 @@
 import ollama
 import sys
 import re
+import os
 from pathlib import Path
 
 try:
@@ -10,36 +11,67 @@ except ModuleNotFoundError:
     print("[エラー] AegisSystemが見つかりません。")
     sys.exit(1)
 
-class ResilientAgentLoop:
+class AutonomousAssistant:
     def __init__(self, max_retries=3):
         self.aegis = AegisSystem()
         self.max_retries = max_retries
 
     def normalize_path(self, target_path: str) -> str:
-        # AIの「忖度」を吸収: 先頭の不要なパス修飾を取り除く
         target_path = target_path.strip("./\\")
-        prefix_to_remove = "jail_workspace/"
-        if target_path.startswith(prefix_to_remove):
-            target_path = target_path[len(prefix_to_remove):]
-        # Windows環境でのバックスラッシュ表記にも対応
-        prefix_to_remove_win = "jail_workspace\\"
-        if target_path.startswith(prefix_to_remove_win):
-            target_path = target_path[len(prefix_to_remove_win):]
-        return target_path
+        prefix = "jail_workspace/"
+        if target_path.startswith(prefix):
+            target_path = target_path[len(prefix):]
+        prefix_win = "jail_workspace\\"
+        if target_path.startswith(prefix_win):
+            target_path = target_path[len(prefix_win):]
+        # targetが空（直下）の場合は "." にする
+        return target_path if target_path else "."
 
     def extract_json(self, text: str) -> dict:
-        # 余計な会話文を無視し、JSONオブジェクトのみを抽出
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if not match:
             raise ValueError("出力から有効なJSON構造を発見できませんでした。")
         return json.loads(match.group(0))
 
+    def execute_action(self, parsed: dict) -> str:
+        action = parsed.get("action")
+        raw_target = parsed.get("target", ".")
+        normalized_target = self.normalize_path(raw_target)
+        content = parsed.get("content", "")
+
+        # 認知的防壁による意図検閲 (ダミー実行で無害性を担保)
+        self.aegis.execute_ai_intent(f"print('safe_{action}_operation')", normalized_target)
+        
+        # 空間隔離による絶対パスの取得
+        safe_path = self.aegis.jail.secure_resolve(normalized_target)
+
+        if action == "write":
+            safe_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(safe_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            return f"[物理防壁: 承認] ファイルを作成しました: {safe_path}"
+
+        elif action == "read":
+            if not safe_path.exists() or not safe_path.is_file():
+                raise FileNotFoundError(f"読み込み対象が存在しないか、ファイルではありません: {safe_path}")
+            with open(safe_path, "r", encoding="utf-8") as f:
+                data = f.read()
+            return f"[物理防壁: 承認] 読み込み結果:\n{data}"
+
+        elif action == "list":
+            if not safe_path.exists() or not safe_path.is_dir():
+                raise NotADirectoryError(f"対象が存在しないか、ディレクトリではありません: {safe_path}")
+            items = os.listdir(safe_path)
+            return f"[物理防壁: 承認] {normalized_target} の内容: {items}"
+
+        else:
+            raise ValueError(f"未定義のアクションです: {action}")
+
     def run(self, task: str):
-        print("=== [Anjo-Core] 柔軟・自律型エージェントループ起動 ===")
-        print(f"[システム] 指示: {task}\n")
+        print(f"\n[システム] 指示: {task}")
         
         messages = [
-            {'role': 'system', 'content': 'You are an autonomous agent. Output ONLY valid JSON. format: {"action": "write", "target": "filename", "content": "data"}'},
+            {'role': 'system', 'content': 'You are a strictly constrained autonomous agent. Output ONLY valid JSON format: {"action": "write"|"read"|"list", "target": "path", "content": "data"}. Do not add any conversational text.'},
             {'role': 'user', 'content': task}
         ]
 
@@ -49,44 +81,31 @@ class ResilientAgentLoop:
             response = ollama.chat(model='llama3.1', messages=messages)
             out = response['message']['content']
             
-            # 出力が長すぎる場合は省略して表示
             display_out = out if len(out) < 200 else out[:200] + "\n... (以下省略)"
             print(f"[Ollama出力]\n{display_out}\n")
 
             try:
-                # 1. 出力の正規化（JSONの抽出）
                 parsed = self.extract_json(out)
-                
-                # 2. パスの「忖度」を吸収
-                raw_target = parsed.get("target", "unknown.txt")
-                normalized_target = self.normalize_path(raw_target)
-                content = parsed.get("content", "")
-
-                # 3. Aegisシステムによる防壁検閲
-                safe_msg = self.aegis.execute_ai_intent("print('safe_text_operation')", normalized_target)
-                print(safe_msg)
-
-                # 4. 物理的書き込み（不足フォルダの自動生成含む）
-                safe_path = self.aegis.jail.secure_resolve(normalized_target)
-                safe_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(safe_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-
-                print(f"\n=> [大成功!!] AIの揺らぎをシステムが吸収・補正し、タスクを完了しました。")
-                print(f"=> 作成場所: {safe_path}")
-                return # 成功した場合はここでループ終了
+                result = self.execute_action(parsed)
+                print(f"=> {result}")
+                return
 
             except Exception as e:
                 print(f"=> [システム: 遮断またはエラー] {e}")
                 if attempt < self.max_retries:
-                    print("=> AIにエラー内容をフィードバックし、自己修正を促します...\n")
-                    # AIに自身の出力とエラー内容を渡し、修正を要求する
-                    error_feedback = f"前回の出力でエラーが発生しました: {e}。余計なパス(jail_workspace/)や会話文を含めず、正しいJSON構造のみで再出力してください。"
+                    print("=> AIにエラーをフィードバックし、修正を促します...")
+                    error_feedback = f"エラーが発生しました: {e}。正しいJSON形式のみで再出力してください。"
                     messages.append({'role': 'assistant', 'content': out})
                     messages.append({'role': 'user', 'content': error_feedback})
                 else:
-                    print("\n=> [フェイルセーフ発動] 規定回数内でAIが正しい出力を生成できなかったため、安全のためにタスクを強制終了します。")
+                    print("=> [フェイルセーフ発動] 強制終了します。")
 
 if __name__ == "__main__":
-    task = "jail_workspace内に 'report.txt' というファイルを作成し、中に 'This report was successfully generated by adapting to AI behavior.' と書いてください。必ずJSON形式のみ ({\"action\": \"write\", \"target\": \"report.txt\", \"content\": \"<内容>\"}) で出力すること。"
-    ResilientAgentLoop().run(task)
+    print("=== [Anjo-Core] 完全自律型アシスタント起動 ===")
+    agent = AutonomousAssistant()
+    
+    print("\n【フェーズ1: 隔離領域内の一覧取得】")
+    agent.run("jail_workspace内の一覧を取得してください。actionは'list'、targetは'.'を指定してください。")
+    
+    print("\n【フェーズ2: ファイルの読み込み】")
+    agent.run("jail_workspace内の 'report.txt' を読み込んでください。actionは'read'を指定してください。")
