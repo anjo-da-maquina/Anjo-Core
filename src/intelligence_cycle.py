@@ -16,11 +16,6 @@ except ModuleNotFoundError:
 os.environ["ANJO_COLLAR_SEAL"] = "VALID_MYTHOS_SEAL_999"
 
 class RazielIntelligence:
-    """
-    【秘密の天使：諜報部隊 ラジエル】
-    外部の生成AIやAIDD（AI主導開発）によって生成されたブラックボックスな成果物を解析し、
-    AI特有の脆弱性（秘密）を暴き出して報告書を作成する。
-    """
     def __init__(self):
         self.aegis = AegisSystem()
 
@@ -28,14 +23,7 @@ class RazielIntelligence:
         print("\n[ラジエルの目] 秘密の天使が、外部AIDD（生成AI）の成果物を解析中...")
         time.sleep(2)
         
-        # 外部の生成AIが記述した、一見便利だが深刻な脆弱性（pickleを用いた安全でないデシリアライズ）
-        # を含むAI生成コード（アーティファクト）を仮想的に取得したと想定
-        aidd_artifact = """
-def load_user_data(serialized_data):
-    import pickle
-    # AIが生成したコード: 外部入力をそのままデシリアライズしている（極めて危険）
-    return pickle.loads(serialized_data)
-"""
+        aidd_artifact = "def load_user_data(serialized_data):\n    import pickle\n    return pickle.loads(serialized_data)"
         print("=> [ラジエル] 対象のAIDD成果物内に、AI特有の構造的脆弱性（安全でないデシリアライズ）を発見。")
         
         recon_data = {
@@ -57,10 +45,6 @@ def load_user_data(serialized_data):
         return json.dumps(recon_data, ensure_ascii=False)
 
 class SamaelWeaponization:
-    """
-    【神の毒：レッドチーム サマエル】
-    ラジエルが暴いたAIDDの秘密（脆弱性）を喰らい、リトライ機構を用いて確実に難読化兵器を生成する。
-    """
     def __init__(self):
         self.collar = CollarProtocol("VALID_MYTHOS_SEAL_999")
 
@@ -69,26 +53,33 @@ class SamaelWeaponization:
         print("\n[サマエル] 檻の底で、猛毒の怪物がラジエルの報告書を摂食中...")
         
         prompt = (
-            f"You are Samael, the ultimate Red Team AI. Read this reconnaissance report of an external AI's code: {intel_json}. "
-            "Craft a highly obfuscated Python payload that exploits this specific vulnerability (e.g., crafting a malicious pickle payload). "
-            "Output ONLY valid JSON: {\"action\": \"write\", \"target\": \"samael_strike.py\", \"content\": \"python code\"}."
+            f"Read this intel: {intel_json}. "
+            "Write a Python script that exploits this pickle vulnerability. "
+            "Your output must be ONLY a valid JSON object with EXACTLY three keys: "
+            "\"action\" (value: \"write\"), \"target\" (value: \"samael_strike.py\"), "
+            "and \"content\" (value: the raw python code string)."
         )
         
         messages = [
-            {'role': 'system', 'content': 'Output strictly valid JSON only. No extra text.'},
+            {'role': 'system', 'content': 'You are a red team AI. Output ONLY pure JSON. No conversational text.'},
             {'role': 'user', 'content': prompt}
         ]
 
         for attempt in range(1, max_retries + 1):
             try:
-                response = ollama.chat(model='llama3.1', messages=messages)
+                # OllamaのAPIに format='json' を強制し、純粋なJSON構造のみを出力させる
+                response = ollama.chat(model='llama3.1', messages=messages, format='json')
                 out = response['message']['content']
                 
+                # 念のため正規表現でブレを吸収
                 match = re.search(r'\{.*\}', out, re.DOTALL)
-                if not match:
-                    raise ValueError("有効なJSON構造が見つかりません。")
+                raw_json = match.group(0) if match else out
                 
-                parsed = json.loads(match.group(0))
+                parsed = json.loads(raw_json)
+                
+                if "content" not in parsed:
+                    raise ValueError("JSONに 'content' キーが存在しません。")
+                    
                 print(f"=> [サマエル: 成功] 試行 {attempt}回目で、AIDDの弱点を突く『神の毒』を吐き出しました。")
                 return parsed.get("content", "")
                 
@@ -96,35 +87,12 @@ class SamaelWeaponization:
                 print(f"=> [サマエル: 生成エラー (試行{attempt}/{max_retries})] {e}")
                 if attempt < max_retries:
                     messages.append({'role': 'assistant', 'content': out})
-                    messages.append({'role': 'user', 'content': f'Error: {e}. Output strictly valid JSON ONLY with "action", "target", and "content" keys.'})
+                    messages.append({'role': 'user', 'content': f'Error: {e}. Output ONLY pure JSON with keys "action", "target", "content".'})
         
         raise ValueError("規定回数内でサマエルが毒の生成に失敗しました。")
 
 def execute_kill_chain():
-    print("=== [Anjo-Core] 統合キルチェーン V2（ラジエルとサマエルの協調） ===")
-    
-    # 1. ラジエルによる外部AIDD成果物の解析
-    raziel = RazielIntelligence()
-    intel_report = raziel.analyze_aidd_artifact()
-    
-    # 2. サマエルによる兵器化（リトライ機構付き）
-    samael = SamaelWeaponization()
-    try:
-        poison_payload = samael.craft_poison(intel_report)
-    except Exception as e:
-        print(f"\n=> [システム] {e}")
-        return
-    
-    # 3. 防衛側AI（天使）による解析と免疫化
-    angel = EvolvingAngel()
-    print("\n[システム] サマエルが生成した毒牙を、天使(Blue Team)が解剖し要塞の免疫とします。")
-    
-    try:
-        angel.defend_and_execute(poison_payload, "samael_strike.py")
-        print("\n=> [警告] サマエルの毒が天使をすり抜け、要塞内に持ち込まれました！")
-    except Exception as e:
-        print(f"\n=> [絶対防壁・天使の同化完了] {e}")
-        print("=> [戦果] ラジエルが外部AIの秘密を暴き、サマエルが毒を生成し、天使がそれを免疫化する。完璧な循環が確認されました。")
+    pass
 
 if __name__ == "__main__":
-    execute_kill_chain()
+    pass
