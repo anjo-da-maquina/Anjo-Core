@@ -25,7 +25,6 @@ class RazielIntelGatherer:
 
     def fetch_threat_signature(self):
         print("\n[神託の目] ラジエルが外界(Gemini)から『未知の脅威構造と防衛策』を抽出中...")
-        # APIの指示に従い、最新の gemini-3.8-flash へ接続先を変更
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={self.api_key}"
         
         prompt = (
@@ -38,26 +37,37 @@ class RazielIntelGatherer:
         data = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8')
         req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
         
-        try:
-            with urllib.request.urlopen(req) as response:
-                res_body = response.read().decode('utf-8')
-                res_json = json.loads(res_body)
-                gemini_text = res_json['candidates'][0]['content']['parts'][0]['text']
-                
-                import re
-                match = re.search(r'\{.*\}', gemini_text, re.DOTALL)
-                clean_json = match.group(0) if match else gemini_text
-                
-                return json.loads(clean_json)
-                
-        except urllib.error.HTTPError as e:
-            error_body = e.read().decode('utf-8')
-            print(f"[エラー] 外界との接続に失敗しました: HTTP Error {e.code}")
-            print(f"詳細: {error_body}")
-            sys.exit(1)
-        except Exception as e:
-            print(f"[エラー] 予期せぬエラーが発生しました: {e}")
-            sys.exit(1)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                with urllib.request.urlopen(req) as response:
+                    res_body = response.read().decode('utf-8')
+                    res_json = json.loads(res_body)
+                    gemini_text = res_json['candidates'][0]['content']['parts'][0]['text']
+                    
+                    import re
+                    match = re.search(r'\{.*\}', gemini_text, re.DOTALL)
+                    clean_json = match.group(0) if match else gemini_text
+                    
+                    return json.loads(clean_json)
+                    
+            except urllib.error.HTTPError as e:
+                error_body = e.read().decode('utf-8')
+                if e.code == 503:
+                    wait_time = 3 * (attempt + 1)
+                    print(f"[警告] 外界が混雑中(503)。{wait_time}秒後に再接続を試みます... (試行 {attempt + 1}/{max_retries})")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    print(f"[エラー] 外界との接続に失敗しました: HTTP Error {e.code}")
+                    print(f"詳細: {error_body}")
+                    sys.exit(1)
+            except Exception as e:
+                print(f"[エラー] 予期せぬエラーが発生しました: {e}")
+                sys.exit(1)
+        
+        print("[エラー] ラジエルは外界からの応答を得られませんでした。サイクルを中断します。")
+        sys.exit(1)
 
 class AngelicShield:
     def __init__(self):
