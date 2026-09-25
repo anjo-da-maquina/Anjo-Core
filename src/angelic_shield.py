@@ -25,7 +25,8 @@ class RazielIntelGatherer:
 
     def fetch_threat_signature(self):
         print("\n[神託の目] ラジエルが外界(Gemini)から『未知の脅威構造と防衛策』を抽出中...")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={self.api_key}"
+        # 確実にアクセス可能な gemini-2.5-flash に接続先を変更
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.api_key}"
         
         prompt = (
             "You are an expert Blue Team cybersecurity AI. "
@@ -49,8 +50,13 @@ class RazielIntelGatherer:
                 
                 return json.loads(clean_json)
                 
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode('utf-8')
+            print(f"[エラー] 外界との接続に失敗しました: HTTP Error {e.code}")
+            print(f"詳細: {error_body}")
+            sys.exit(1)
         except Exception as e:
-            print(f"[エラー] 外界との接続または解析に失敗しました: {e}")
+            print(f"[エラー] 予期せぬエラーが発生しました: {e}")
             sys.exit(1)
 
 class AngelicShield:
