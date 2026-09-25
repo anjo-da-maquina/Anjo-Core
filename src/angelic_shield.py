@@ -25,7 +25,14 @@ class RazielIntelGatherer:
 
     def fetch_threat_signature(self):
         print("\n[神託の目] ラジエルが外界(Gemini)から『未知の脅威構造と防衛策』を抽出中...")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={self.api_key}"
+        
+        # 接続を試みる代替モデルのリスト（優先度順）
+        models_to_try = [
+            "gemini-3.8-flash",
+            "gemini-3.5-flash",
+            "gemini-flash-latest",
+            "gemini-2.5-pro"
+        ]
         
         prompt = (
             "You are an expert Blue Team cybersecurity AI. "
@@ -35,10 +42,12 @@ class RazielIntelGatherer:
         )
         
         data = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode('utf-8')
-        req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
         
-        max_retries = 3
-        for attempt in range(max_retries):
+        for model_name in models_to_try:
+            print(f"[ラジエル] 接続先 '{model_name}' へアクセスを試みます...")
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
+            req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
+            
             try:
                 with urllib.request.urlopen(req) as response:
                     res_body = response.read().decode('utf-8')
@@ -52,21 +61,19 @@ class RazielIntelGatherer:
                     return json.loads(clean_json)
                     
             except urllib.error.HTTPError as e:
-                error_body = e.read().decode('utf-8')
-                if e.code == 503:
-                    wait_time = 3 * (attempt + 1)
-                    print(f"[警告] 外界が混雑中(503)。{wait_time}秒後に再接続を試みます... (試行 {attempt + 1}/{max_retries})")
-                    time.sleep(wait_time)
+                if e.code in (503, 404):
+                    print(f"[警告] '{model_name}' は現在応答不可({e.code})です。直ちに次の代替次元へ切り替えます。")
                     continue
                 else:
-                    print(f"[エラー] 外界との接続に失敗しました: HTTP Error {e.code}")
+                    error_body = e.read().decode('utf-8')
+                    print(f"[エラー] 外界との接続に致命的な失敗が発生しました: HTTP Error {e.code}")
                     print(f"詳細: {error_body}")
                     sys.exit(1)
             except Exception as e:
                 print(f"[エラー] 予期せぬエラーが発生しました: {e}")
                 sys.exit(1)
-        
-        print("[エラー] ラジエルは外界からの応答を得られませんでした。サイクルを中断します。")
+                
+        print("[エラー] 利用可能なすべての外界サーバーが応答しませんでした。システムを一時休眠します。")
         sys.exit(1)
 
 class AngelicShield:
