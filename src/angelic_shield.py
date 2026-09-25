@@ -27,7 +27,6 @@ class RazielIntelGatherer:
         print("\n[神託の目] ラジエルが外界(Gemini)から『未知の脅威構造と防衛策』を抽出中...")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={self.api_key}"
         
-        # サマエルの毒ではなく、防衛のためのシグネチャ（特徴量）のみを要求する
         prompt = (
             "You are an expert Blue Team cybersecurity AI. "
             "Generate ONLY a pure JSON object describing a specific Python vulnerability. "
@@ -54,10 +53,9 @@ class RazielIntelGatherer:
             print(f"[エラー] 外界との接続または解析に失敗しました: {e}")
             sys.exit(1)
 
-class EvolvingAegisShield:
+class AngelicShield:
     def __init__(self):
         self.rules_file = Path("shield_rules.json")
-        # 防壁ルールファイルが存在しなければ初期化
         if not self.rules_file.exists():
             with open(self.rules_file, "w", encoding="utf-8") as f:
                 json.dump({"blocked_modules": [], "blocked_functions": []}, f)
@@ -70,7 +68,6 @@ class EvolvingAegisShield:
         new_mods = intel.get("dangerous_modules", [])
         new_funcs = intel.get("dangerous_functions", [])
 
-        # 重複を排除して新しい脅威パターンを追記（進化）
         rules["blocked_modules"] = list(set(rules["blocked_modules"] + new_mods))
         rules["blocked_functions"] = list(set(rules["blocked_functions"] + new_funcs))
 
@@ -87,13 +84,12 @@ if __name__ == "__main__":
         print("[警告] GEMINI_API_KEY が設定されていません。")
         sys.exit(1)
         
-    print("=== [Anjo-Core] 自律進化型防壁（Blue Team モード）起動 ===")
+    print("=== [Anjo-Core] 自律進化型防壁『天使の盾』起動 ===")
     raziel = RazielIntelGatherer(api_key)
-    aegis = EvolvingAegisShield()
+    shield = AngelicShield()
     
-    # 盾を3回連続で学習・進化させる
     for i in range(1, 4):
         print(f"\n--- [メタトロン] 防壁進化サイクル 第 {i:03d} 階層 ---")
         intel = raziel.fetch_threat_signature()
-        aegis.assimilate_knowledge(intel)
+        shield.assimilate_knowledge(intel)
         time.sleep(2)
