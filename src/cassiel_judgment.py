@@ -56,7 +56,8 @@ def execute_judgment(target_file):
     with open(rules_file, "r", encoding="utf-8") as f:
         rules = json.load(f)
 
-    with open(target_file, "r", encoding="utf-8") as f:
+    # 修正: utf-8-sig を使用し、BOM(U+FEFF)などの不可視ノイズを自動的に除去して読み込む
+    with open(target_file, "r", encoding="utf-8-sig") as f:
         source_code = f.read()
 
     try:
