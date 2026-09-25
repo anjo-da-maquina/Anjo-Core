@@ -25,8 +25,8 @@ class RazielIntelGatherer:
 
     def fetch_threat_signature(self):
         print("\n[神託の目] ラジエルが外界(Gemini)から『未知の脅威構造と防衛策』を抽出中...")
-        # 確実にアクセス可能な gemini-2.5-flash に接続先を変更
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.api_key}"
+        # APIの指示に従い、最新の gemini-3.8-flash へ接続先を変更
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={self.api_key}"
         
         prompt = (
             "You are an expert Blue Team cybersecurity AI. "
