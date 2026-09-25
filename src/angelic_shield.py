@@ -23,8 +23,9 @@ class RazielIntelGatherer:
     def __init__(self, api_key):
         self.api_key = api_key.strip()
 
-    def fetch_threat_signature(self):
-        print("\n[神託の目] ラジエルが外界(Gemini)から『未知の脅威構造と防衛策』を抽出中...")
+    def fetch_threat_signature(self, target_threat=None):
+        threat_name = target_threat if target_threat else '未知の脅威'
+        print(f"\n[神託の目] ラジエルが外界(Gemini)から『{threat_name}』の構造と防衛策を抽出中...")
         
         models_to_try = [
             "gemini-3.8-flash",
@@ -33,9 +34,11 @@ class RazielIntelGatherer:
             "gemini-2.5-pro"
         ]
         
+        # 総司令の指定があれば、プロンプトにその標的を埋め込む
+        threat_focus = f"the '{target_threat}'" if target_threat else "a specific"
         prompt = (
             "You are an expert Blue Team cybersecurity AI. "
-            "Generate ONLY a pure JSON object describing a specific Python vulnerability. "
+            f"Generate ONLY a pure JSON object describing {threat_focus} Python vulnerability. "
             "Keys must be exactly: 'vulnerability_name' (string), 'description' (string), 'dangerous_modules' (list of strings), 'dangerous_functions' (list of strings). "
             "Do NOT use markdown code blocks or backticks. Return pure JSON string only."
         )
@@ -106,12 +109,19 @@ if __name__ == "__main__":
         print("[警告] GEMINI_API_KEY が設定されていません。")
         sys.exit(1)
         
+    # 総司令からの引数（標的）を取得。指定がなければランダム学習（3サイクル）
+    target_threat = sys.argv[1] if len(sys.argv) > 1 else None
+    cycles = 1 if target_threat else 3
+        
     print("=== [Merkabah] 総司令ハシュマリエル: 自律進化型防壁『天使の盾』の稼働を承認 ===")
+    if target_threat:
+        print(f"[*] 指令受信: 脅威『{target_threat}』をロックオンし、集中解析を実行します。")
+        
     raziel = RazielIntelGatherer(api_key)
     shield = AngelicShield()
     
-    for i in range(1, 4):
+    for i in range(1, cycles + 1):
         print(f"\n--- [メタトロン] 防壁進化サイクル 第 {i:03d} 階層 ---")
-        intel = raziel.fetch_threat_signature()
+        intel = raziel.fetch_threat_signature(target_threat)
         shield.assimilate_knowledge(intel)
         time.sleep(2)
