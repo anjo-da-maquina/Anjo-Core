@@ -4,7 +4,6 @@ import json
 import urllib.request
 import urllib.error
 
-# 1. まず必要なモジュール（味方）をすべて読み込み、初期化を済ませる
 try:
     from metatron_orchestrator import MetatronOrchestrator
     from intelligence_cycle import RazielIntelligence
@@ -12,7 +11,6 @@ except ModuleNotFoundError:
     print("[エラー] 必要なモジュールが見つかりません。")
     sys.exit(1)
 
-# 2. 初期化完了直後、いかなる干渉も許さない【メタトロンの刻印】を最下層に刻む
 def metatrons_seal(event, args):
     dangerous_events = [
         "os.system",
@@ -34,12 +32,12 @@ print("[システム] メタトロンの刻印（CPython Audit Hook）が最下�
 class GeminiRaziel(RazielIntelligence):
     def __init__(self, api_key):
         super().__init__()
-        # 見えない空白や改行を自動で削ぎ落とす
         self.api_key = api_key.strip()
 
     def analyze_aidd_artifact(self):
         print("\n[神託の目] 秘密の天使ラジエルが、外界(Gemini)から現実の脅威概念を抽出中...")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={self.api_key}"
+        # エラーの原因だった '-latest' を削除し、正しいモデル名を指定
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.api_key}"
         
         prompt = (
             "You are a highly advanced threat intelligence AI. "
