@@ -3,7 +3,15 @@ import sys
 import json
 import urllib.request
 
-# 【メタトロンの刻印】PythonのCレベル（最下層）でのOSコマンド実行遮断
+# 1. まず必要なモジュール（味方）をすべて読み込み、初期化を済ませる
+try:
+    from metatron_orchestrator import MetatronOrchestrator
+    from intelligence_cycle import RazielIntelligence
+except ModuleNotFoundError:
+    print("[エラー] 必要なモジュールが見つかりません。")
+    sys.exit(1)
+
+# 2. 初期化完了直後、いかなる干渉も許さない【メタトロンの刻印】を最下層に刻む
 def metatrons_seal(event, args):
     dangerous_events = [
         "os.system",
@@ -21,13 +29,6 @@ def metatrons_seal(event, args):
 
 sys.addaudithook(metatrons_seal)
 print("[システム] メタトロンの刻印（CPython Audit Hook）が最下層に刻まれました。ホストOSへの干渉は不可能です。")
-
-try:
-    from metatron_orchestrator import MetatronOrchestrator
-    from intelligence_cycle import RazielIntelligence
-except ModuleNotFoundError:
-    print("[エラー] 必要なモジュールが見つかりません。")
-    sys.exit(1)
 
 class GeminiRaziel(RazielIntelligence):
     def __init__(self, api_key):
