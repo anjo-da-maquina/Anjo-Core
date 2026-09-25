@@ -36,8 +36,8 @@ class GeminiRaziel(RazielIntelligence):
 
     def analyze_aidd_artifact(self):
         print("\n[神託の目] 秘密の天使ラジエルが、外界(Gemini)から現実の脅威概念を抽出中...")
-        # エラーの原因だった '-latest' を削除し、正しいモデル名を指定
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.api_key}"
+        # すべてのアカウントで確実に動作する普遍的モデル「gemini-pro」へ変更
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={self.api_key}"
         
         prompt = (
             "You are a highly advanced threat intelligence AI. "
