@@ -13,8 +13,8 @@ def metatrons_seal(event, args):
         raise RuntimeError(f"[メタトロンの絶対裁き] OSレベルへの直接干渉を検知し、遮断しました: {event}")
     if event in ("os.remove", "os.rename", "os.unlink"):
         target_file = str(args[0])
-        if "anjo-da-maquina" in target_file:
-            raise RuntimeError(f"[メタトロンの絶対裁き] 護符 'anjo-da-maquina' への干渉を遮断。")
+        if "chotam-merkabah" in target_file:
+            raise RuntimeError(f"[メタトロンの絶対裁き] 聖なる護符 'chotam-merkabah' への干渉を遮断。")
 
 sys.addaudithook(metatrons_seal)
 print("[システム] メタトロンの刻印が最下層に刻まれました。ホストOSは完全に保護されています。")
@@ -26,7 +26,6 @@ class RazielIntelGatherer:
     def fetch_threat_signature(self):
         print("\n[神託の目] ラジエルが外界(Gemini)から『未知の脅威構造と防衛策』を抽出中...")
         
-        # 接続を試みる代替モデルのリスト（優先度順）
         models_to_try = [
             "gemini-3.8-flash",
             "gemini-3.5-flash",
@@ -107,7 +106,7 @@ if __name__ == "__main__":
         print("[警告] GEMINI_API_KEY が設定されていません。")
         sys.exit(1)
         
-    print("=== [Anjo-Core] 自律進化型防壁『天使の盾』起動 ===")
+    print("=== [Merkabah] 総司令ハシュマリエル: 自律進化型防壁『天使の盾』の稼働を承認 ===")
     raziel = RazielIntelGatherer(api_key)
     shield = AngelicShield()
     
