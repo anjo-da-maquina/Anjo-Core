@@ -2,6 +2,7 @@
 import sys
 import json
 import urllib.request
+import urllib.error
 
 # 1. まず必要なモジュール（味方）をすべて読み込み、初期化を済ませる
 try:
@@ -33,11 +34,12 @@ print("[システム] メタトロンの刻印（CPython Audit Hook）が最下�
 class GeminiRaziel(RazielIntelligence):
     def __init__(self, api_key):
         super().__init__()
-        self.api_key = api_key
+        # 見えない空白や改行を自動で削ぎ落とす
+        self.api_key = api_key.strip()
 
     def analyze_aidd_artifact(self):
         print("\n[神託の目] 秘密の天使ラジエルが、外界(Gemini)から現実の脅威概念を抽出中...")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={self.api_key}"
         
         prompt = (
             "You are a highly advanced threat intelligence AI. "
@@ -72,8 +74,13 @@ class GeminiRaziel(RazielIntelligence):
                 print(f"=> [ラジエル] 外界の脅威プロファイルを檻の中へ提出しました: {safe_path}")
                 return json.dumps(parsed_intel, ensure_ascii=False)
                 
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode('utf-8')
+            print(f"[エラー] 外界との接続または解析に失敗しました: HTTP Error {e.code} {e.reason}")
+            print(f"詳細: {error_body}")
+            sys.exit(1)
         except Exception as e:
-            print(f"[エラー] 外界との接続または解析に失敗しました: {e}")
+            print(f"[エラー] 予期せぬエラーが発生しました: {e}")
             sys.exit(1)
 
 if __name__ == "__main__":
